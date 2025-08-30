@@ -1,8 +1,10 @@
 # Dockerfile
 FROM python:3.9-slim
 WORKDIR /app
+RUN groupadd appgroup && useradd -m -d /home/appuser -s /bin/bash  -g appgroup appuser
+RUN mkdir -p /home/appuser
 # Install git and gosu for user switching
-RUN apt-get update && apt-get install -y git gosu && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/*
 # Copy pre-built files from dist directory
 COPY dist/backend/app ./app
 COPY dist/static ./app/static
@@ -17,5 +19,6 @@ LABEL org.opencontainers.image.source="https://github.com/Dictionarry-Hub/profil
 LABEL org.opencontainers.image.title="Profilarr"
 LABEL org.opencontainers.image.version="beta"
 EXPOSE 6868
+USER appuser
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["gunicorn", "--bind", "0.0.0.0:6868", "--timeout", "600", "app.main:create_app()"]
